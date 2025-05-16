@@ -65,6 +65,29 @@
       z-index: 1000;
     }
 
+    /* ===== モーダル ===== */
+    .modal {
+      display: none;           /* 初期は非表示 */
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 2000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 1.5em;
+      margin: 10% auto;
+      max-width: 320px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+    .modal-content button {
+      width: 100%;
+      margin: 0.5em 0;
+      padding: 0.6em 0;
+      font-size: 1em;
+    }
     .create-button {
       position: fixed;
       top: 1em;
@@ -101,7 +124,18 @@
 <body>
   <div class="next" id="nextDisplay">Next: </div>
   <button class="edit-button" id="editBtn" onclick="toggleEdit()">編集 ✎</button>
-  <button class="create-button" id="createBtn" onclick="createNewItem()">＋ リストに追加</button>
+  <!-- ▼▼ イ・ロ・ハ選択モーダル ▼▼ -->
+  <div id="actionMenu" class="modal">
+    <div class="modal-content">
+      <h3>操作を選択してください</h3>
+      <button onclick="choiceAdd()">場所追加</button>
+      <button onclick="choiceDelete()">場所削除</button>
+      <button onclick="choiceEdit()">ToDo編集</button>
+      <br><br>
+      <button onclick="closeActionMenu()">閉じる</button>
+    </div>
+  </div>
+  <button class="create-button" id="createBtn" onclick="openActionMenu()">＋ リストに追加</button>
   <div id="places"></div>
 
   <script>
@@ -202,8 +236,26 @@
       render();
     }
 
-    function createNewItem() {
-      alert("新しいリスト作成機能はまだ実装されていません。");
+    /* ==== モーダル開閉 ==== */
+    function openActionMenu() {
+      document.getElementById('actionMenu').style.display = 'block';
+    }
+    function closeActionMenu() {
+      document.getElementById('actionMenu').style.display = 'none';
+    }
+
+    /* ==== 各ボタンのハンドラ（中身は後で実装） ==== */
+    function choiceAdd() {
+      closeActionMenu();
+      alert('（追加）をこれから実装します');
+    }
+    function choiceDelete() {
+      closeActionMenu();
+      alert('（削除）をこれから実装します');
+    }
+    function choiceEdit() {
+      closeActionMenu();
+      alert('（ToDo編集）をこれから実装します');
     }
 
 
