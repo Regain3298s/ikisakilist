@@ -8,13 +8,14 @@
   body {
     font-family: sans-serif;
     margin: 20px;
-    max-width: 600px;
+    max-width: 700px;
+    font-size: 20px; /* 全体を大きめに */
   }
   #nextDisplay {
-    font-size: 3em;
+    font-size: 3.5em;
     font-weight: bold;
     margin-bottom: 1em;
-    border-bottom: 3px solid #000;
+    border-bottom: 4px solid #000;
     padding-bottom: 0.2em;
   }
   #places {
@@ -22,10 +23,11 @@
   }
   .place {
     border: none;
-    padding: 0.5em 0;
+    padding: 0.8em 0;
     margin-bottom: 0.5em;
     cursor: pointer;
     border-bottom: 1px solid #ccc;
+    font-size: 1.4em; /* リスト項目を2段階ほど大きく */
   }
   .todos {
     display: none !important;
@@ -33,15 +35,20 @@
   .edit-controls button {
     margin-left: 0.5em;
   }
+  #editBtn {
+    font-size: 1em;
+    padding: 0.3em 0.8em;
+    margin-bottom: 1em;
+  }
 </style>
 </head>
 <body>
 
+<button id="editBtn">編集モード ON</button>
 <div id="nextDisplay">Next: -</div>
 <div id="places"></div>
 
 <script>
-  // 行先データ例
   let data = [
     {name:"渋谷", todos:["カフェで休憩","映画館行く"], hidden:false},
     {name:"新宿", todos:["ショッピング","食事"], hidden:false},
@@ -50,6 +57,12 @@
 
   let editing = false;
 
+  document.getElementById("editBtn").addEventListener("click", () => {
+    editing = !editing;
+    document.getElementById("editBtn").textContent = editing ? "編集モード OFF" : "編集モード ON";
+    render();
+  });
+
   function render() {
     const placesDiv = document.getElementById("places");
     placesDiv.innerHTML = "";
@@ -57,11 +70,9 @@
     const visible = data.filter(d => !d.hidden);
     const nextPlace = visible.length ? visible[0] : null;
 
-    // Next表示（大きく）
     document.getElementById("nextDisplay").textContent = nextPlace ? `Next: ${nextPlace.name}` : "Next: -";
 
     data.forEach((place, index) => {
-      // Nextに表示しているものはリストに表示しない（編集モード時は表示）
       if (place === nextPlace && !editing) return;
 
       const div = document.createElement("div");
@@ -69,22 +80,9 @@
 
       const label = document.createElement("span");
       label.textContent = place.name;
-
       div.appendChild(label);
 
-      if (!editing) {
-        // 編集モードでない時はtodo非表示なので処理なし
-      } else {
-        // 編集モード時はtodos表示（ここは必要なら）
-        const todos = document.createElement("div");
-        todos.className = "todos";
-        place.todos.forEach(t => {
-          const item = document.createElement("div");
-          item.textContent = `・${t}`;
-          todos.appendChild(item);
-        });
-        div.appendChild(todos);
-
+      if (editing) {
         const controls = document.createElement("span");
         controls.className = "edit-controls";
 
