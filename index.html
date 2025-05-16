@@ -65,6 +65,27 @@
       z-index: 1000;
     }
 
+    .create-button {
+      position: fixed;
+      top: 1em;
+      right: 1em;
+      font-size: 1.2em;
+      padding: 1em 1.5em;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      user-select: none;
+    }
+
+    .create-button:hover {
+      background-color: #45a049;
+    }
+
+
 
     button {
       margin: 0 0.2em;
@@ -80,6 +101,7 @@
 <body>
   <div class="next" id="nextDisplay">Next: </div>
   <button class="edit-button" id="editBtn" onclick="toggleEdit()">編集 ✎</button>
+  <button class="create-button" id="createBtn" onclick="createNewItem()">＋ リストに追加</button>
   <div id="places"></div>
 
   <script>
@@ -179,6 +201,11 @@
       document.getElementById("editBtn").textContent = editing ? "完了 ✔" : "編集 ✎";
       render();
     }
+
+    function createNewItem() {
+      alert("新しいリスト作成機能はまだ実装されていません。");
+    }
+
 
     render();
   </script>
