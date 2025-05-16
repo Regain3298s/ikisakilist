@@ -3,42 +3,53 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>行先リスト</title>
+<title>行き先リスト</title>
 <style>
-  body {
-    font-family: sans-serif;
-    margin: 20px;
-    max-width: 700px;
-    font-size: 20px; /* 全体を大きめに */
+  /* --- 全体設定 --- */
+  body{
+    font-family:sans-serif;
+    margin:20px;
+    max-width:700px;
+    font-size:20px;          /* ベース文字を大きめに */
   }
-  #nextDisplay {
-    font-size: 3.5em;
-    font-weight: bold;
-    margin-bottom: 1em;
-    border-bottom: 4px solid #000;
-    padding-bottom: 0.2em;
+
+  /* --- Next 表示 --- */
+  #nextDisplay{
+    font-size:2.5em;         /* 以前より小さく（≈‐5ステップ） */
+    font-weight:bold;
+    margin-bottom:1em;
+    border-bottom:4px solid #000;
+    padding-bottom:0.2em;
   }
-  #places {
-    user-select: none;
+
+  /* --- 行き先リスト --- */
+  #places{ user-select:none; }
+
+  .place{
+    border:none;
+    padding:0.8em 0;
+    margin-bottom:0.5em;
+    cursor:pointer;
+    border-bottom:1px solid #ccc;
+    font-size:1.4em;         /* リスト項目の大文字サイズ */
   }
-  .place {
-    border: none;
-    padding: 0.8em 0;
-    margin-bottom: 0.5em;
-    cursor: pointer;
-    border-bottom: 1px solid #ccc;
-    font-size: 1.4em; /* リスト項目を2段階ほど大きく */
-  }
-  .todos {
-    display: none !important;
-  }
-  .edit-controls button {
-    margin-left: 0.5em;
-  }
-  #editBtn {
-    font-size: 1em;
-    padding: 0.3em 0.8em;
-    margin-bottom: 1em;
+
+  /* ToDo 初期非表示（タップで切替） */
+  .todos{ display:none; margin-top:0.4em; font-size:0.9em; }
+
+  /* --- 編集関連 --- */
+  .edit-controls button{ margin-left:0.4em; }
+  body.editing .place{ cursor:default; }
+  body.editing .todos{ display:none; }      /* 編集中は開かない */
+
+  /* 編集ボタンを画面右下に固定 */
+  #editBtn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    font-size:1em;
+    padding:0.5em 1em;
+    z-index:1000;
   }
 </style>
 </head>
@@ -49,81 +60,71 @@
 <div id="places"></div>
 
 <script>
-  let data = [
-    {name:"渋谷", todos:["カフェで休憩","映画館行く"], hidden:false},
-    {name:"新宿", todos:["ショッピング","食事"], hidden:false},
+  /* ---------------- サンプルデータ ---------------- */
+  let data=[
+    {name:"渋谷",   todos:["カフェで休憩","映画館"], hidden:false},
+    {name:"新宿",   todos:["ショッピング","ランチ"], hidden:false},
     {name:"秋葉原", todos:["電気街散策","メイド喫茶"], hidden:false},
   ];
 
-  let editing = false;
+  /* ---------------- 状態フラグ ---------------- */
+  let editing=false;
 
-  document.getElementById("editBtn").addEventListener("click", () => {
-    editing = !editing;
-    document.getElementById("editBtn").textContent = editing ? "編集モード OFF" : "編集モード ON";
+  /* 右下ボタン押下 → 編集モード切替 */
+  document.getElementById("editBtn").addEventListener("click",()=>{
+    editing=!editing;
+    document.body.classList.toggle("editing",editing);
+    document.getElementById("editBtn").textContent=
+      editing?"編集モード OFF":"編集モード ON";
     render();
   });
 
-  function render() {
-    const placesDiv = document.getElementById("places");
-    placesDiv.innerHTML = "";
+  /* ---------------- 描画関数 ---------------- */
+  function render(){
+    const placesDiv=document.getElementById("places");
+    placesDiv.innerHTML="";
 
-    const visible = data.filter(d => !d.hidden);
-    const nextPlace = visible.length ? visible[0] : null;
+    /* Next は「非 hidden」の先頭 */
+    const visible=data.filter(d=>!d.hidden);
+    const nextPlace=visible.length?visible[0]:null;
+    document.getElementById("nextDisplay").textContent=
+      nextPlace?`Next: ${nextPlace.name}`:"Next: -";
 
-    document.getElementById("nextDisplay").textContent = nextPlace ? `Next: ${nextPlace.name}` : "Next: -";
+    /* リスト生成 */
+    data.forEach((place,idx)=>{
+      /* 通常モードでは Next の分は下リストに出さない */
+      if(!editing && place===nextPlace) return;
 
-    data.forEach((place, index) => {
-      if (place === nextPlace && !editing) return;
+      const div=document.createElement("div");
+      div.className="place";
+      div.textContent=place.name;
 
-      const div = document.createElement("div");
-      div.className = "place";
+      /* --- ToDo 部分 --- */
+      const todoDiv=document.createElement("div");
+      todoDiv.className="todos";
+      place.todos.forEach(t=>{
+        const li=document.createElement("div");
+        li.textContent="・"+t;
+        todoDiv.appendChild(li);
+      });
+      div.appendChild(todoDiv);
 
-      const label = document.createElement("span");
-      label.textContent = place.name;
-      div.appendChild(label);
+      /* --- 通常モード：タップで ToDo 開閉 --- */
+      if(!editing){
+        div.addEventListener("click",()=>{
+          todoDiv.style.display=todoDiv.style.display==="none"?"block":"none";
+        });
+      }else{
+        /* --- 編集モード：チェック＆↑↓ --- */
+        const ctr=document.createElement("span");
+        ctr.className="edit-controls";
 
-      if (editing) {
-        const controls = document.createElement("span");
-        controls.className = "edit-controls";
-
-        const check = document.createElement("input");
-        check.type = "checkbox";
-        check.checked = !place.hidden;
-        check.onchange = () => {
-          place.hidden = !check.checked;
+        const chk=document.createElement("input");
+        chk.type="checkbox";
+        chk.checked=!place.hidden;
+        chk.onchange=()=>{
+          place.hidden=!chk.checked;
           render();
         };
 
-        const up = document.createElement("button");
-        up.textContent = "↑";
-        up.onclick = () => {
-          if (index > 0) {
-            [data[index - 1], data[index]] = [data[index], data[index - 1]];
-            render();
-          }
-        };
-
-        const down = document.createElement("button");
-        down.textContent = "↓";
-        down.onclick = () => {
-          if (index < data.length - 1) {
-            [data[index + 1], data[index]] = [data[index], data[index + 1]];
-            render();
-          }
-        };
-
-        controls.appendChild(check);
-        controls.appendChild(up);
-        controls.appendChild(down);
-        div.appendChild(controls);
-      }
-
-      placesDiv.appendChild(div);
-    });
-  }
-
-  render();
-</script>
-
-</body>
-</html>
+        const up=document.createElement("button");
