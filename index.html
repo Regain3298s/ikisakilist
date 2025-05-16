@@ -88,6 +88,15 @@
       padding: 0.6em 0;
       font-size: 1em;
     }
+    .modal-button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5em;
+    }
+    .modal-button-grid button {
+      padding: 1em 0;
+      font-size: 1em;
+    }
     .create-button {
       position: fixed;
       top: 1em;
@@ -125,15 +134,11 @@
   <div class="next" id="nextDisplay">Next: </div>
   <button class="edit-button" id="editBtn" onclick="toggleEdit()">編集 ✎</button>
   <!-- ▼▼ イ・ロ・ハ選択モーダル ▼▼ -->
-  <div id="actionMenu" class="modal">
-    <div class="modal-content">
-      <h3>操作を選択してください</h3>
-      <button onclick="choiceAdd()">場所追加</button>
-      <button onclick="choiceDelete()">場所削除</button>
-      <button onclick="choiceEdit()">ToDo編集</button>
-      <br><br>
-      <button onclick="closeActionMenu()">閉じる</button>
-    </div>
+  <div class="modal-button-grid">
+    <button onclick="choiceAdd()">場所追加</button>
+    <button onclick="choiceDelete()">場所削除</button>
+    <button onclick="choiceEdit()">ToDo編集</button>
+    <button onclick="closeActionMenu()">閉じる</button>
   </div>
   <button class="create-button" id="createBtn" onclick="openActionMenu()">＋ リストに追加</button>
   <div id="places"></div>
