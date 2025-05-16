@@ -61,6 +61,12 @@
     button {
       margin: 0 0.2em;
     }
+
+    .checkbox-text {
+      font-size: 1em;
+      cursor: pointer;
+      margin-right: 0.5em;
+    }
   </style>
 </head>
 <body>
@@ -85,7 +91,7 @@
       const next = visible[0];
       document.getElementById("nextDisplay").textContent = next ? `Next: ${next.name}` : "Next: -";
 
-      // Next表示部分のクリックでToDo表示
+      // NextのタップでToDo表示
       document.getElementById("nextDisplay").onclick = () => {
         if (!next) return;
         const todos = next.todos.map(t => `・${t}`).join("\n");
@@ -93,7 +99,7 @@
       };
 
       data.forEach((place, index) => {
-        if (!editing && place === next) return; // 編集でない時はNext項目はリストに表示しない
+        if (!editing && place === next) return;
 
         const div = document.createElement("div");
         div.className = "place";
@@ -121,11 +127,11 @@
           const controls = document.createElement("span");
           controls.className = "edit-controls";
 
-          const check = document.createElement("input");
-          check.type = "checkbox";
-          check.checked = !place.hidden;
-          check.onchange = () => {
-            place.hidden = !check.checked;
+          const checkboxText = document.createElement("span");
+          checkboxText.className = "checkbox-text";
+          checkboxText.textContent = place.hidden ? "☑" : "☐";
+          checkboxText.onclick = () => {
+            place.hidden = !place.hidden;
             render();
           };
 
@@ -147,7 +153,7 @@
             }
           };
 
-          controls.appendChild(check);
+          controls.appendChild(checkboxText);
           controls.appendChild(up);
           controls.appendChild(down);
           div.appendChild(controls);
