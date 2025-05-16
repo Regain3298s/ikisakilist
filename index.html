@@ -2,161 +2,169 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>行き先リスト</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今日の行き先リスト</title>
   <style>
     body {
       font-family: sans-serif;
-      margin: 20px;
-      max-width: 700px;
-      font-size: 20px;
+      margin: 0;
+      padding: 1em;
+      background: #fff;
+      color: #000;
+      font-size: 1.4em;
     }
 
-    #nextDisplay {
-      font-size: 2.5em; /* 小さめに変更 */
+    .next {
+      font-size: 2em;
       font-weight: bold;
-      margin-bottom: 1em;
-      border-bottom: 4px solid #000;
-      padding-bottom: 0.2em;
-    }
-
-    #places { user-select: none; }
-
-    .place {
-      border: none;
-      padding: 0.8em 0;
       margin-bottom: 0.5em;
       cursor: pointer;
-      border-bottom: 1px solid #ccc;
-      font-size: 1.4em;
+    }
+
+    .place {
+      border-bottom: 1px solid #000;
+      padding: 0.5em 0;
+      cursor: pointer;
     }
 
     .todos {
       display: none;
-      margin-top: 0.4em;
+      padding-left: 1em;
       font-size: 0.9em;
     }
 
-    .edit-controls button {
-      margin-left: 0.4em;
+    .edit-controls {
+      display: none;
+      float: right;
     }
 
-    body.editing .place {
+    .edit-mode .edit-controls {
+      display: inline-block;
+    }
+
+    .edit-mode .place {
       cursor: default;
     }
 
-    body.editing .todos {
+    .hidden-in-list {
       display: none;
     }
 
-    #editBtn {
+    .edit-button {
       position: fixed;
-      bottom: 20px;
-      right: 20px;
+      bottom: 1em;
+      right: 1em;
       font-size: 1em;
       padding: 0.5em 1em;
-      z-index: 1000;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 0.5em;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    button {
+      margin: 0 0.2em;
     }
   </style>
 </head>
 <body>
+  <div class="next" id="nextDisplay">Next: </div>
+  <button class="edit-button" id="editBtn" onclick="toggleEdit()">編集 ✎</button>
+  <div id="places"></div>
 
-<div id="nextDisplay">Next: -</div>
-<div id="places"></div>
-<button id="editBtn">編集モード ON</button>
+  <script>
+    let editing = false;
+    let data = [
+      { name: "渋谷", todos: ["ライブ会場", "CD購入"], hidden: false },
+      { name: "新宿", todos: ["家電量販店", "映画"], hidden: false },
+      { name: "秋葉原", todos: ["グッズショップ", "ゲームセンター"], hidden: false },
+      { name: "中野", todos: ["ブロードウェイ", "古書店巡り"], hidden: false }
+    ];
 
-<script>
-  const data = [
-    {name: "渋谷",   todos: ["カフェで休憩", "映画館"], hidden: false},
-    {name: "新宿",   todos: ["ショッピング", "ランチ"], hidden: false},
-    {name: "秋葉原", todos: ["電気街散策", "メイド喫茶"], hidden: false},
-  ];
+    function render() {
+      const placesDiv = document.getElementById("places");
+      placesDiv.innerHTML = "";
 
-  let editing = false;
+      const visible = data.filter(d => !d.hidden);
+      const next = visible[0];
+      document.getElementById("nextDisplay").textContent = next ? `Next: ${next.name}` : "Next: -";
 
-  document.getElementById("editBtn").addEventListener("click", () => {
-    editing = !editing;
-    document.body.classList.toggle("editing", editing);
-    document.getElementById("editBtn").textContent = editing ? "編集モード OFF" : "編集モード ON";
-    render();
-  });
+      // Next表示部分のクリックでToDo表示
+      document.getElementById("nextDisplay").onclick = () => {
+        if (!next) return;
+        const todos = next.todos.map(t => `・${t}`).join("\n");
+        alert(`${next.name} の予定:\n${todos}`);
+      };
 
-  function render() {
-    const placesDiv = document.getElementById("places");
-    placesDiv.innerHTML = "";
+      data.forEach((place, index) => {
+        if (!editing && place === next) return; // 編集でない時はNext項目はリストに表示しない
 
-    const visible = data.filter(d => !d.hidden);
-    const nextPlace = visible.length ? visible[0] : null;
-    document.getElementById("nextDisplay").textContent =
-      nextPlace ? `Next: ${nextPlace.name}` : "Next: -";
+        const div = document.createElement("div");
+        div.className = "place";
+        if (!editing && place.hidden) div.classList.add("hidden-in-list");
 
-    data.forEach((place, idx) => {
-      // 通常モードでは Next のものをスキップ
-      if (!editing && place === nextPlace) return;
+        const label = document.createElement("span");
+        label.textContent = place.name;
 
-      const div = document.createElement("div");
-      div.className = "place";
-      div.textContent = place.name;
-
-      const todoDiv = document.createElement("div");
-      todoDiv.className = "todos";
-      place.todos.forEach(todo => {
-        const item = document.createElement("div");
-        item.textContent = "・" + todo;
-        todoDiv.appendChild(item);
-      });
-      div.appendChild(todoDiv);
-
-      if (!editing) {
-        div.addEventListener("click", () => {
-          todoDiv.style.display = todoDiv.style.display === "none" ? "block" : "none";
+        const todos = document.createElement("div");
+        todos.className = "todos";
+        place.todos.forEach(t => {
+          const item = document.createElement("div");
+          item.textContent = `・${t}`;
+          todos.appendChild(item);
         });
-      } else {
-        const ctr = document.createElement("span");
-        ctr.className = "edit-controls";
 
-        const chk = document.createElement("input");
-        chk.type = "checkbox";
-        chk.checked = !place.hidden;
-        chk.onchange = () => {
-          place.hidden = !chk.checked;
-          render();
-        };
+        div.appendChild(label);
+        div.appendChild(todos);
 
-        const up = document.createElement("button");
-        up.textContent = "↑";
-        up.onclick = () => {
-          if (idx > 0) {
-            [data[idx - 1], data[idx]] = [data[idx], data[idx - 1]];
+        if (!editing) {
+          div.onclick = () => {
+            todos.style.display = todos.style.display === "none" ? "block" : "none";
+          };
+        } else {
+          const controls = document.createElement("span");
+          controls.className = "edit-controls";
+
+          const check = document.createElement("input");
+          check.type = "checkbox";
+          check.checked = !place.hidden;
+          check.onchange = () => {
+            place.hidden = !check.checked;
             render();
-          }
-        };
+          };
 
-        const down = document.createElement("button");
-        down.textContent = "↓";
-        down.onclick = () => {
-          if (idx < data.length - 1) {
-            [data[idx + 1], data[idx]] = [data[idx], data[idx + 1]];
-            render();
-          }
-        };
+          const up = document.createElement("button");
+          up.textContent = "↑";
+          up.onclick = () => {
+            if (index > 0) {
+              [data[index - 1], data[index]] = [data[index], data[index - 1]];
+              render();
+            }
+          };
 
-        ctr.append(chk, up, down);
-        div.appendChild(ctr);
-      }
+          const down = document.createElement("button");
+          down.textContent = "↓";
+          down.onclick = () => {
+            if (index < data.length - 1) {
+              [data[index + 1], data[index]] = [data[index], data[index + 1]];
+              render();
+            }
+          };
 
-      placesDiv.appendChild(div);
-    });
-  }
+          controls.appendChild(check);
+          controls.appendChild(up);
+          controls.appendChild(down);
+          div.appendChild(controls);
+        }
 
-  render();
-</script>
+        placesDiv.appendChild(div);
+      });
+    }
 
+    function toggleEdit() {
+      editing = !editing;
+      document.body.classList.toggle("edit-mode", editing);
+      document.getElementById("editBtn").textContent = editing ? "完了 ✔" : "編集 ✎";
+      render();
+    }
+
+    render();
+  </script>
 </body>
 </html>
