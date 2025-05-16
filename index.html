@@ -1,50 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>行き先リスト</title>
-  <style>
-    body { font-family: sans-serif; margin: 1em; }
-    #next { font-size: 1.8em; font-weight: bold; margin-bottom: 1em; }
-    .place { border: 1px solid #000; padding: 0.6em; margin-bottom: 0.4em; cursor: pointer; }
-    .todos { display: none; font-size: 0.9em; margin-top: 0.4em; }
-    .edit-btns { display: none; margin-top: 0.3em; }
-    .edit-mode .edit-btns { display: block; }
-    .hidden { display: none; }
-    button { font-size: 0.9em; margin-right: 0.2em; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>行先リスト</title>
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 20px;
+    max-width: 600px;
+  }
+  #nextDisplay {
+    font-size: 3em;
+    font-weight: bold;
+    margin-bottom: 1em;
+    border-bottom: 3px solid #000;
+    padding-bottom: 0.2em;
+  }
+  #places {
+    user-select: none;
+  }
+  .place {
+    border: none;
+    padding: 0.5em 0;
+    margin-bottom: 0.5em;
+    cursor: pointer;
+    border-bottom: 1px solid #ccc;
+  }
+  .todos {
+    display: none !important;
+  }
+  .edit-controls button {
+    margin-left: 0.5em;
+  }
+</style>
 </head>
 <body>
-  <div id="next">Next: </div>
-  <button onclick="toggleEdit()">編集</button>
-  <div id="places"></div>
 
-  <script>
-    let editing = false;
-    let data = [
-      { name: "ららぽーと", todos: ["チャージ", "スリーブ購入"], hidden: false },
-      { name: "平針", todos: ["ジムバ"], hidden: false },
-      { name: "床屋", todos: ["散髪"], hidden: false },
-      { name: "三洋堂", todos: ["e-hon", "フリューくじ"], hidden: false }
-    ];
+<div id="nextDisplay">Next: -</div>
+<div id="places"></div>
 
-    function render() {
-      const placesDiv = document.getElementById("places");
-      placesDiv.innerHTML = "";
+<script>
+  // 行先データ例
+  let data = [
+    {name:"渋谷", todos:["カフェで休憩","映画館行く"], hidden:false},
+    {name:"新宿", todos:["ショッピング","食事"], hidden:false},
+    {name:"秋葉原", todos:["電気街散策","メイド喫茶"], hidden:false},
+  ];
 
-      const visible = data.filter(d => !d.hidden);
-      document.getElementById("next").textContent = visible.length ? `Next: ${visible[0].name}` : "Next: -";
+  let editing = false;
 
-      data.forEach((place, index) => {
-        const div = document.createElement("div");
-        div.className = "place";
-        if (!editing && place.hidden) div.classList.add("hidden");
+  function render() {
+    const placesDiv = document.getElementById("places");
+    placesDiv.innerHTML = "";
 
-        const label = document.createElement("span");
-        label.textContent = place.name;
-        div.appendChild(label);
+    const visible = data.filter(d => !d.hidden);
+    const nextPlace = visible.length ? visible[0] : null;
 
+    // Next表示（大きく）
+    document.getElementById("nextDisplay").textContent = nextPlace ? `Next: ${nextPlace.name}` : "Next: -";
+
+    data.forEach((place, index) => {
+      // Nextに表示しているものはリストに表示しない（編集モード時は表示）
+      if (place === nextPlace && !editing) return;
+
+      const div = document.createElement("div");
+      div.className = "place";
+
+      const label = document.createElement("span");
+      label.textContent = place.name;
+
+      div.appendChild(label);
+
+      if (!editing) {
+        // 編集モードでない時はtodo非表示なので処理なし
+      } else {
+        // 編集モード時はtodos表示（ここは必要なら）
         const todos = document.createElement("div");
         todos.className = "todos";
         place.todos.forEach(t => {
@@ -54,56 +85,47 @@
         });
         div.appendChild(todos);
 
-        if (!editing) {
-          div.onclick = () => {
-            todos.style.display = todos.style.display === "none" ? "block" : "none";
-          };
-        } else {
-          const controls = document.createElement("span");
-          controls.className = "edit-btns";
+        const controls = document.createElement("span");
+        controls.className = "edit-controls";
 
-          const check = document.createElement("input");
-          check.type = "checkbox";
-          check.checked = !place.hidden;
-          check.onchange = () => {
-            place.hidden = !check.checked;
+        const check = document.createElement("input");
+        check.type = "checkbox";
+        check.checked = !place.hidden;
+        check.onchange = () => {
+          place.hidden = !check.checked;
+          render();
+        };
+
+        const up = document.createElement("button");
+        up.textContent = "↑";
+        up.onclick = () => {
+          if (index > 0) {
+            [data[index - 1], data[index]] = [data[index], data[index - 1]];
             render();
-          };
+          }
+        };
 
-          const up = document.createElement("button");
-          up.textContent = "↑";
-          up.onclick = () => {
-            if (index > 0) {
-              [data[index - 1], data[index]] = [data[index], data[index - 1]];
-              render();
-            }
-          };
+        const down = document.createElement("button");
+        down.textContent = "↓";
+        down.onclick = () => {
+          if (index < data.length - 1) {
+            [data[index + 1], data[index]] = [data[index], data[index + 1]];
+            render();
+          }
+        };
 
-          const down = document.createElement("button");
-          down.textContent = "↓";
-          down.onclick = () => {
-            if (index < data.length - 1) {
-              [data[index + 1], data[index]] = [data[index], data[index + 1]];
-              render();
-            }
-          };
+        controls.appendChild(check);
+        controls.appendChild(up);
+        controls.appendChild(down);
+        div.appendChild(controls);
+      }
 
-          controls.appendChild(check);
-          controls.appendChild(up);
-          controls.appendChild(down);
-          div.appendChild(controls);
-        }
-        placesDiv.appendChild(div);
-      });
-    }
+      placesDiv.appendChild(div);
+    });
+  }
 
-    function toggleEdit() {
-      editing = !editing;
-      document.body.classList.toggle("edit-mode", editing);
-      render();
-    }
+  render();
+</script>
 
-    render();
-  </script>
 </body>
 </html>
