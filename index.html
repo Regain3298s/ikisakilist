@@ -100,8 +100,8 @@
     }
     .create-button {
       position: static;
-      top: 1em;
-      right: 1em;
+      margin-left: auto;  /* 必要に応じて右寄せ */
+      display: block;
       font-size: 1.2em;
       padding: 0.5em;
       background-color: #4CAF50;
@@ -109,7 +109,6 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      z-index: 1000;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       user-select: none;
     }
