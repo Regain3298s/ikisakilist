@@ -136,11 +136,13 @@
   <button class="edit-button" id="editBtn" onclick="toggleEdit()">編集 ✎</button>
   <!-- ▼▼ イ・ロ・ハ選択モーダル ▼▼ -->
   <div id="actionMenu" class="modal">
-    <div class="modal-button-grid">
-      <button onclick="choiceAdd()">場所追加</button>
-      <button onclick="choiceDelete()">場所削除</button>
-      <button onclick="choiceEdit()">ToDo編集</button>
-      <button onclick="closeActionMenu()">閉じる</button>
+    <div class="modal-content">
+      <div class="modal-button-grid">
+        <button onclick="choiceAdd()">場所追加</button>
+        <button onclick="choiceDelete()">場所削除</button>
+        <button onclick="choiceEdit()">ToDo編集</button>
+        <button onclick="closeActionMenu()">閉じる</button>
+      </div>
     </div>
   </div>
   <button class="create-button" id="createBtn" onclick="openActionMenu()">＋ リストに追加</button>
