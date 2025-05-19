@@ -129,11 +129,20 @@
       cursor: pointer;
       margin-right: 0.5em;
     }
+
+    #addModal .modal-content input {
+      width: 100%;
+      padding: 0.4em;
+      font-size: 1em;
+      margin-bottom: 0.3em;
+    }
+
   </style>
 </head>
 <body>
   <div class="next" id="nextDisplay">Next: </div>
   <button class="edit-button" id="editBtn" onclick="toggleEdit()">編集 ✎</button>
+  
   <!-- ▼▼ イ・ロ・ハ選択モーダル ▼▼ -->
   <div id="actionMenu" class="modal">
     <div class="modal-content">
@@ -145,6 +154,24 @@
       </div>
     </div>
   </div>
+
+  <div id="addModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>新しい行き先</h3>
+      <input id="newPlace" type="text" placeholder="行き先名" style="width:100%;font-size:1em"><br><br>
+      <div id="todoInputs">
+        <!-- 5 枠を生成 -->
+        <input class="todoField" type="text" placeholder="ToDo 1"><br>
+        <input class="todoField" type="text" placeholder="ToDo 2"><br>
+        <input class="todoField" type="text" placeholder="ToDo 3"><br>
+        <input class="todoField" type="text" placeholder="ToDo 4"><br>
+        <input class="todoField" type="text" placeholder="ToDo 5"><br>
+      </div><br>
+      <button onclick="addPlace()">追加</button>
+      <button onclick="closeAddModal()">キャンセル</button>
+    </div>
+  </div>
+  
   <button class="create-button" id="createBtn" onclick="openActionMenu()">＋ リストに追加</button>
   <div id="places"></div>
 
@@ -255,9 +282,41 @@
     }
 
     /* ==== 各ボタンのハンドラ（中身は後で実装） ==== */
+    /* ---------- 追加モーダル表示 ---------- */
+    function openAddModal() {
+      document.getElementById('addModal').style.display = 'block';
+    }
+    function closeAddModal() {
+      document.getElementById('addModal').style.display = 'none';
+    }
+
+    /* ---------- アクションメニュー側のハンドラ修正 ---------- */
     function choiceAdd() {
-      closeActionMenu();
-      alert('（追加）をこれから実装します');
+      closeActionMenu();  // 既存メニューを閉じる
+      openAddModal();     // 追加入力モーダルを開く
+    }
+
+    /* ---------- 本処理：行き先を data 配列に追加 ---------- */
+    function addPlace() {
+      const placeName = document.getElementById('newPlace').value.trim();
+      if (!placeName) { alert('行き先名を入力してください'); return; }
+    
+      // ToDo を 5 枠から取得、空欄を除外
+      const todos = Array.from(document.querySelectorAll('.todoField'))
+                         .map(el => el.value.trim())
+                         .filter(t => t !== '');
+
+      // 末尾に追加
+      data.push({ name: placeName, todos: todos, hidden: false });
+
+      // フォームをクリア
+      document.getElementById('newPlace').value = '';
+      document.querySelectorAll('.todoField').forEach(el => el.value = '');
+
+      closeAddModal();
+      render();
+    }
+
     }
     function choiceDelete() {
       closeActionMenu();
@@ -270,6 +329,9 @@
 
     document.getElementById('actionMenu').addEventListener('click', (e) => {
       if (e.target === e.currentTarget) closeActionMenu();
+    });
+    document.getElementById('addModal').addEventListener('click', e=>{
+      if(e.target===e.currentTarget) closeAddModal();
     });
 
 
