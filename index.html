@@ -140,6 +140,13 @@
       margin-bottom: 0.3em;
     }
 
+    #deleteList label {
+      display: block;
+      margin: 0.5em 0;
+      text-align: left;
+    }
+
+
   </style>
 </head>
 <body>
@@ -174,6 +181,18 @@
       <button onclick="closeAddModal()">キャンセル</button>
     </div>
   </div>
+
+  <!-- ▼▼ 削除モーダル ▼▼ -->
+  <div id="deleteModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>削除する行き先を選んでください</h3>
+      <div id="deleteList"></div>
+      <br>
+      <button onclick="confirmDelete()">削除</button>
+      <button onclick="closeDeleteModal()">キャンセル</button>
+    </div>
+  </div>
+
   
   <button class="create-button" id="createBtn" onclick="openActionMenu()">＋ リストに追加</button>
   <div id="places"></div>
@@ -318,12 +337,57 @@
 
       closeAddModal();
       render();
-
     }
+    
+    function openDeleteModal() {
+      const list = document.getElementById('deleteList');
+      list.innerHTML = '';
+
+      data.forEach((place, index) => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = index;
+        label.appendChild(checkbox);
+        label.append(` ${place.name}`);
+        list.appendChild(label);
+      });
+
+      document.getElementById('deleteModal').style.display = 'block';
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    // 動作ロの呼び出し元
     function choiceDelete() {
       closeActionMenu();
-      alert('（削除）をこれから実装します');
+      openDeleteModal();
     }
+
+    // 実行処理
+    function confirmDelete() {
+      const checks = document.querySelectorAll('#deleteList input[type="checkbox"]:checked');
+      if (checks.length === 0) {
+        alert("削除する行き先を選んでください");
+        return;
+      }
+
+      const names = Array.from(checks).map(c => data[c.value].name).join("\n");
+      if (!confirm(`${names}\n\nを削除しますか？`)) return;
+
+      // 削除処理（indexの降順で削除）
+      const indices = Array.from(checks).map(c => parseInt(c.value)).sort((a, b) => b - a);
+      for (const i of indices) {
+        data.splice(i, 1);
+      }
+
+      closeDeleteModal();
+      render();
+    }
+
+    
     function choiceEdit() {
       closeActionMenu();
       alert('（ToDo編集）をこれから実装します');
@@ -335,6 +399,10 @@
     document.getElementById('addModal').addEventListener('click', e=>{
       if(e.target===e.currentTarget) closeAddModal();
     });
+    document.getElementById('deleteModal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeDeleteModal();
+    });
+
 
 
     render();
