@@ -146,6 +146,15 @@
       text-align: left;
     }
 
+    #editTodoFields input {
+      width: 100%;
+      padding: 0.4em;
+      font-size: 1em;
+      margin-bottom: 0.3em;
+      box-sizing: border-box;
+    }
+
+
 
   </style>
 </head>
@@ -192,6 +201,22 @@
       <button onclick="closeDeleteModal()">キャンセル</button>
     </div>
   </div>
+
+  <!-- ▼▼ ToDo編集モーダル ▼▼ -->
+  <div id="editModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <h3>ToDoを編集する行き先を選んでください</h3>
+      <select id="editTarget" onchange="loadTodoFields()" style="width:100%;font-size:1em;"></select>
+      <br><br>
+      <div id="editTodoFields">
+        <!-- ToDo 入力欄がここに動的生成される -->
+      </div>
+      <br>
+      <button onclick="saveEditedTodos()">保存</button>
+      <button onclick="closeEditModal()">キャンセル</button>
+    </div>
+  </div>
+
 
   
   <button class="create-button" id="createBtn" onclick="openActionMenu()">＋ リストに追加</button>
@@ -303,7 +328,7 @@
       document.getElementById('actionMenu').style.display = 'none';
     }
 
-    /* ==== 各ボタンのハンドラ（中身は後で実装） ==== */
+    /* ==== 各ボタンのハンドラ ==== */
     /* ---------- 追加モーダル表示 ---------- */
     function openAddModal() {
       document.getElementById('addModal').style.display = 'block';
@@ -390,8 +415,54 @@
     
     function choiceEdit() {
       closeActionMenu();
-      alert('（ToDo編集）をこれから実装します');
+      openEditModal();
     }
+
+    function openEditModal() {
+      const select = document.getElementById('editTarget');
+      select.innerHTML = '';
+
+    data.forEach((place, index) => {
+        const opt = document.createElement('option');
+        opt.value = index;
+        opt.textContent = place.name;
+        select.appendChild(opt);
+      });
+
+      loadTodoFields();
+      document.getElementById('editModal').style.display = 'block';
+    }
+
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+      }
+
+    function loadTodoFields() {
+      const index = document.getElementById('editTarget').value;
+      const container = document.getElementById('editTodoFields');
+      container.innerHTML = '';
+
+      const todos = data[index].todos;
+
+      for (let i = 0; i < 5; i++) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = todos[i] || '';
+        container.appendChild(input);
+      }
+    }
+
+    function saveEditedTodos() {
+      const index = document.getElementById('editTarget').value;
+      const inputs = document.querySelectorAll('#editTodoFields input');
+      const todos = Array.from(inputs).map(i => i.value.trim()).filter(t => t !== '');
+
+      data[index].todos = todos;
+
+      closeEditModal();
+      render();
+    }
+
 
     document.getElementById('actionMenu').addEventListener('click', (e) => {
       if (e.target === e.currentTarget) closeActionMenu();
@@ -402,6 +473,10 @@
     document.getElementById('deleteModal').addEventListener('click', e => {
       if (e.target === e.currentTarget) closeDeleteModal();
     });
+    document.getElementById('editModal').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeEditModal();
+    });
+
 
 
 
