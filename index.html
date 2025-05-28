@@ -361,6 +361,7 @@
       document.querySelectorAll('.todoField').forEach(el => el.value = '');
 
       closeAddModal();
+      saveData();
       render();
     }
     
@@ -409,10 +410,12 @@
       }
 
       closeDeleteModal();
+      saveData();
       render();
     }
 
-    
+
+    /* ToDo編集 */
     function choiceEdit() {
       closeActionMenu();
       openEditModal();
@@ -460,8 +463,22 @@
       data[index].todos = todos;
 
       closeEditModal();
+      saveData();
       render();
     }
+
+    /* ブラウザに保存 */
+    function saveData() {
+    localStorage.setItem("destinationListData", JSON.stringify(data));
+  }
+
+  function loadData() {
+    const saved = localStorage.getItem("destinationListData");
+    if (saved) {
+      data = JSON.parse(saved);
+    }
+  }
+
 
 
     document.getElementById('actionMenu').addEventListener('click', (e) => {
@@ -477,9 +494,7 @@
       if (e.target === e.currentTarget) closeEditModal();
     });
 
-
-
-
+    loadData();
     render();
   </script>
 </body>
